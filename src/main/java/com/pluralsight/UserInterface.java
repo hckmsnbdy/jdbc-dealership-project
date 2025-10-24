@@ -1,5 +1,8 @@
 package com.pluralsight;
 
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.Scanner;
 import java.util.ArrayList;
 
@@ -76,8 +79,7 @@ public class UserInterface {
                     System.out.println("Goodbye.");
                     break;
                 default:
-                    // not implemented yet
-                    System.out.println("Option not implemented yet.");
+                    System.out.println("Invalid option. Please choose a number from the menu.");
                     break;
             }
         }
@@ -179,7 +181,56 @@ public class UserInterface {
 
         displayVehicles(matches);
     }
+    private void processAddVehicleRequest() {
+        System.out.println("=== ADD NEW VEHICLE ===");
 
+        System.out.print("Enter VIN: ");
+        int vin = Integer.parseInt(scanner.nextLine());
 
+        System.out.print("Enter year: ");
+        int year = Integer.parseInt(scanner.nextLine());
+
+        System.out.print("Enter make: ");
+        String make = scanner.nextLine();
+
+        System.out.print("Enter model: ");
+        String model = scanner.nextLine();
+
+        System.out.print("Enter type (car/truck/SUV/van): ");
+        String type = scanner.nextLine();
+
+        System.out.print("Enter color: ");
+        String color = scanner.nextLine();
+
+        System.out.print("Enter odometer reading: ");
+        int odometer = Integer.parseInt(scanner.nextLine());
+
+        System.out.print("Enter price: ");
+        double price = Double.parseDouble(scanner.nextLine());
+
+        // Create the Vehicle and add it
+        Vehicle newVehicle = new Vehicle(vin, year, odometer, make, model, color, type, price );
+        dealership.addVehicle(newVehicle);
+
+        // Save dealership
+        DealershipFileManager dfm = new DealershipFileManager();
+        dfm.saveDealership(dealership);
+
+        System.out.println("Vehicle added and saved.");
+    }
+    private void processRemoveVehicleRequest() {
+        System.out.print("Enter VIN of vehicle to remove: ");
+        int vin = Integer.parseInt(scanner.nextLine());
+
+        boolean removed = dealership.removeVehicle(vin);
+
+        if (removed) {
+            DealershipFileManager dfm = new DealershipFileManager();
+            dfm.saveDealership(dealership);
+            System.out.println("Vehicle removed and file updated.");
+        } else {
+            System.out.println("Vehicle with VIN " + vin + " not found.");
+        }
+    }
 
 }
