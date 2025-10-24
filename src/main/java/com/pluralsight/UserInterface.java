@@ -48,9 +48,27 @@ public class UserInterface {
                 case "2":
                     processGetByMakeModel();
                     break;
+                case "3":
+                    processGetByYearRange();
+                    break;
+                case "4":
+                    processGetByColor();
+                    break;
+                case "5":
+                    processGetByMileageRange();
+                    break;
+                case "6":
+                    processGetByType();
+                    break;
                 case "7":
                     // list all vehicles
                     processAllVehiclesRequest();
+                    break;
+                case "8":
+                    processAddVehicleRequest();
+                    break;
+                case "9":
+                    processRemoveVehicleRequest();
                     break;
                 case "0":
                     // quit the loop
@@ -123,5 +141,45 @@ public class UserInterface {
         // Display them
         displayVehicles(matches);
     }
+    private void processGetByYearRange() {
+        System.out.print("Enter minimum year: ");
+        int minYear = Integer.parseInt(scanner.nextLine());
+
+        System.out.print("Enter maximum year: ");
+        int maxYear = Integer.parseInt(scanner.nextLine());
+
+        ArrayList<Vehicle> matches = dealership.getVehiclesByYear(minYear, maxYear);
+
+        displayVehicles(matches);
+    }
+    private void processGetByColor() {
+        System.out.print("Enter color: ");
+        String color = scanner.nextLine();
+
+        ArrayList<Vehicle> matches = dealership.getVehiclesByColor(color);
+
+        displayVehicles(matches);
+    }
+    private void processGetByMileageRange() {
+        System.out.print("Enter minimum mileage: ");
+        int minMiles = Integer.parseInt(scanner.nextLine());
+
+        System.out.print("Enter maximum mileage: ");
+        int maxMiles = Integer.parseInt(scanner.nextLine());
+
+        ArrayList<Vehicle> matches = dealership.getVehiclesByMilage(minMiles, maxMiles);
+
+        displayVehicles(matches);
+    }
+    private void processGetByType() {
+        System.out.print("Enter vehicle type (car / truck / SUV / van): ");
+        String type = scanner.nextLine();
+
+        ArrayList<Vehicle> matches = dealership.getVehiclesByType(type);
+
+        displayVehicles(matches);
+    }
+
+
 
 }

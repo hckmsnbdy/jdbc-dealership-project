@@ -124,7 +124,6 @@ public class Dealership {
     public void addVehicle(Vehicle vehicle){
         inventory.add(vehicle);
         System.out.println("Vehicle added: " + vehicle.getMake() + " " + vehicle.getModel());
-//         Vehicle vehicle = new Vehicle(1234567890, 1996, 1000,"BMW", "M5", "White","Sedan",100000);
     }
     public boolean removeVehicle(int vin) {
         // Loop over inventory to find vehicle with this VIN
