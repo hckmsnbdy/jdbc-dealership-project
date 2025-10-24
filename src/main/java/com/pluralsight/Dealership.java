@@ -123,7 +123,6 @@ public class Dealership {
     }
     public void addVehicle(Vehicle vehicle){
         inventory.add(vehicle);
-        System.out.println("Vehicle added: " + vehicle.getMake() + " " + vehicle.getModel());
     }
     public boolean removeVehicle(int vin) {
         // Loop over inventory to find vehicle with this VIN
