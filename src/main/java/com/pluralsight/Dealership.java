@@ -1,7 +1,6 @@
 package com.pluralsight;
 
 import java.util.ArrayList;
-import java.util.List;
 
 public class Dealership {
     private String name;
@@ -135,6 +134,21 @@ public class Dealership {
         }
         return false; // not found
     }
+    // Returns the vehicle with the given VIN or null if not found
+    public Vehicle getVehicleByVin(int vin) {
+        for (Vehicle v : inventory) {
+            if (v.getVin() == vin) {
+                return v;
+            }
+        }
+        return null;
+    }
+
+    // Removes the given vehicle object from inventory
+    public void removeVehicle(Vehicle vehicle) {
+        inventory.remove(vehicle);
+    }
+
 
 
 
