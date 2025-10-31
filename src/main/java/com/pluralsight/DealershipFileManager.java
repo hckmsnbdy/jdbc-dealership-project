@@ -3,12 +3,13 @@ package com.pluralsight;
 import java.io.*;
 
 public class DealershipFileManager {
+    private static final String INVENTORY_FILE = "src/main/resources/inventory.csv";
 
     public Dealership getDealership() {
         Dealership dealership = null;
 
         try {
-            FileReader fileReader = new FileReader("src/main/resources/inventory.csv");
+            FileReader fileReader = new FileReader(INVENTORY_FILE);
             BufferedReader bufferedReader = new BufferedReader(fileReader);
 
             String firstLine = bufferedReader.readLine();
@@ -55,7 +56,7 @@ public class DealershipFileManager {
     }
     public void saveDealership(Dealership dealership) {
         try {
-            FileWriter writer = new FileWriter("inventory.csv");
+            FileWriter writer = new FileWriter(INVENTORY_FILE);
             BufferedWriter bufferedWriter = new BufferedWriter(writer);
 
             // Write dealership info (first line)
