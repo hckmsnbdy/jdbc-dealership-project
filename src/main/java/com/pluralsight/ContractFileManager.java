@@ -1,8 +1,8 @@
 package com.pluralsight;
 
-import java.io.BufferedWriter;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.*;
+import java.util.ArrayList;
+import java.util.List;
 
 public class ContractFileManager {
 
@@ -55,7 +55,6 @@ public class ContractFileManager {
                         .append(String.format("%.2f", lc.getMonthlyPayment()));
             }
 
-            // Write to file
             writer.write(line.toString());
             writer.newLine();
 
@@ -63,4 +62,21 @@ public class ContractFileManager {
             System.err.println("Error saving contract: " + e.getMessage());
         }
     }
+
+    public List<String> readAllContracts() {
+        List<String> lines = new ArrayList<>();
+
+        try (BufferedReader reader = new BufferedReader(new FileReader(FILE_PATH))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                if (line.trim().isEmpty()) continue;
+                lines.add(line);
+            }
+        } catch (IOException e) {
+            System.err.println("Error reading contracts: " + e.getMessage());
+        }
+
+        return lines;
+    }
+
 }

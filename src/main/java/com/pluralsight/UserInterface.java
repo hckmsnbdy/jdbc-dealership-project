@@ -36,7 +36,8 @@ public class UserInterface {
             System.out.println("7 - List ALL vehicles");
             System.out.println("8 - Add a vehicle");
             System.out.println("9 - Remove a vehicle");
-            System.out.println("10) Sell/Lease a Vehicle");
+            System.out.println("10 - Sell/Lease a Vehicle");
+            System.out.println("11 - List all contracts");
             System.out.println("0 - Quit");
             System.out.print("Enter choice: ");
 
@@ -73,6 +74,9 @@ public class UserInterface {
                     break;
                 case "10":
                     sellOrLeaseVehicle();
+                    break;
+                case "11":
+                    listAllContracts();
                     break;
                 case "0":
                     // quit the loop
@@ -244,7 +248,6 @@ public class UserInterface {
         ContractFileManager contractFileManager = new ContractFileManager();
 
         // 1. Ask for VIN
-        System.out.print("Enter VIN of the vehicle: ");
         int vin = readInt("Enter VIN of the vehicle: ");
 
         // 2. Find vehicle in current inventory
@@ -326,6 +329,74 @@ public class UserInterface {
         System.out.printf("Total Price: %.2f%n", contract.getTotalPrice());
         System.out.printf("Monthly Payment: %.2f%n", contract.getMonthlyPayment());
     }
+    private void listAllContracts() {
+        ContractFileManager cfm = new ContractFileManager();
+        var lines = cfm.readAllContracts();
+
+        if (lines == null || lines.isEmpty()) {
+            System.out.println("No contracts found.");
+            return;
+        }
+
+        System.out.println("=== CONTRACTS ===");
+
+        for (String line : lines) {
+
+            String[] parts = line.split("\\|");
+            String kind = parts[0];
+
+            if ("SALE".equalsIgnoreCase(kind)) {
+                if (parts.length >= 18) {
+                    System.out.printf(
+                            "[SALE] %s - %s (%s)%n",
+                            parts[1], // date
+                            parts[2], // customer name
+                            parts[3]  // customer email
+                    );
+                    System.out.printf("  Vehicle: %s %s %s (%s) VIN:%s%n",
+                            parts[5],  // year
+                            parts[6],  // make
+                            parts[7],  // model
+                            parts[9],  // color
+                            parts[4]   // vin
+                    );
+                    System.out.printf("  Total: %s  | Monthly: %s  | Finance: %s%n",
+                            parts[15], // total price
+                            parts[17], // monthly payment
+                            parts[16]  // YES/NO
+                    );
+                } else {
+                    System.out.println("  (malformed SALE line) " + line);
+                }
+            } else if ("LEASE".equalsIgnoreCase(kind)) {
+                if (parts.length >= 16) {
+                    System.out.printf(
+                            "[LEASE] %s - %s (%s)%n",
+                            parts[1], // date
+                            parts[2], // name
+                            parts[3]  // email
+                    );
+                    System.out.printf("  Vehicle: %s %s %s (%s) VIN:%s%n",
+                            parts[5],   // year
+                            parts[6],   // make
+                            parts[7],   // model
+                            parts[9],   // color
+                            parts[4]    // vin
+                    );
+                    System.out.printf("  Total: %s  | Monthly: %s%n",
+                            parts[14],  // total
+                            parts[15]   // monthly
+                    );
+                } else {
+                    System.out.println("  (malformed LEASE line) " + line);
+                }
+            } else {
+                // unknown line type
+                System.out.println("Unknown contract type: " + line);
+            }
+        }
+    }
+
 
 
 }
