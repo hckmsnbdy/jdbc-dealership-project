@@ -85,6 +85,33 @@ public class UserInterface {
             }
         }
     }
+
+    // Reads an int from the user, keeps asking until a valid number is entered
+    private int readInt(String prompt) {
+        while (true) {
+            System.out.print(prompt);
+            String line = scanner.nextLine().trim();
+            try {
+                return Integer.parseInt(line);
+            } catch (NumberFormatException e) {
+                System.out.println("Please enter a valid number.");
+            }
+        }
+    }
+
+    // Reads a double from the user
+    private double readDouble(String prompt) {
+        while (true) {
+            System.out.print(prompt);
+            String line = scanner.nextLine().trim();
+            try {
+                return Double.parseDouble(line);
+            } catch (NumberFormatException e) {
+                System.out.println("Please enter a valid decimal number (like 12999.99).");
+            }
+        }
+    }
+
     private void displayVehicles(ArrayList<Vehicle> vehicles) {
         // If the list is empty or null, tell the user
         if (vehicles == null || vehicles.isEmpty()) {
@@ -115,21 +142,13 @@ public class UserInterface {
         displayVehicles(allVehicles);
     }
     private void processGetByPriceRange() {
-        // Ask user for min and max price
-        System.out.print("Enter minimum price: ");
-        int min = scanner.nextInt();
-        scanner.nextLine();
+        int min = readInt("Enter minimum price: ");
+        int max = readInt("Enter maximum price: ");
 
-        System.out.print("Enter maximum price: ");
-        int max = scanner.nextInt();
-        scanner.nextLine();
-
-        // Call dealership to get matching vehicles
-        ArrayList<Vehicle> matches = dealership.getVehiclesByPrice((int)min, (int)max);
-
-        // Display results
+        ArrayList<Vehicle> matches = dealership.getVehiclesByPrice(min, max);
         displayVehicles(matches);
     }
+
     private void processGetByMakeModel() {
         // Ask user for make (brand) and model
         System.out.print("Enter make (brand): ");
@@ -145,16 +164,13 @@ public class UserInterface {
         displayVehicles(matches);
     }
     private void processGetByYearRange() {
-        System.out.print("Enter minimum year: ");
-        int minYear = Integer.parseInt(scanner.nextLine());
-
-        System.out.print("Enter maximum year: ");
-        int maxYear = Integer.parseInt(scanner.nextLine());
+        int minYear = readInt("Enter minimum year: ");
+        int maxYear = readInt("Enter maximum year: ");
 
         ArrayList<Vehicle> matches = dealership.getVehiclesByYear(minYear, maxYear);
-
         displayVehicles(matches);
     }
+
     private void processGetByColor() {
         System.out.print("Enter color: ");
         String color = scanner.nextLine();
@@ -164,16 +180,13 @@ public class UserInterface {
         displayVehicles(matches);
     }
     private void processGetByMileageRange() {
-        System.out.print("Enter minimum mileage: ");
-        int minMiles = Integer.parseInt(scanner.nextLine());
+        int minMiles = readInt("Enter minimum mileage: ");
+        int maxMiles = readInt("Enter maximum mileage: ");
 
-        System.out.print("Enter maximum mileage: ");
-        int maxMiles = Integer.parseInt(scanner.nextLine());
-
-        ArrayList<Vehicle> matches = dealership.getVehiclesByMilage(minMiles, maxMiles);
-
+        ArrayList<Vehicle> matches = dealership.getVehiclesByMileage(minMiles, maxMiles);
         displayVehicles(matches);
     }
+
     private void processGetByType() {
         System.out.print("Enter vehicle type (car / truck / SUV / van): ");
         String type = scanner.nextLine();
@@ -185,11 +198,8 @@ public class UserInterface {
     private void processAddVehicleRequest() {
         System.out.println("=== ADD NEW VEHICLE ===");
 
-        System.out.print("Enter VIN: ");
-        int vin = Integer.parseInt(scanner.nextLine());
-
-        System.out.print("Enter year: ");
-        int year = Integer.parseInt(scanner.nextLine());
+        int vin = readInt("Enter VIN: ");
+        int year = readInt("Enter year: ");
 
         System.out.print("Enter make: ");
         String make = scanner.nextLine();
@@ -203,25 +213,20 @@ public class UserInterface {
         System.out.print("Enter color: ");
         String color = scanner.nextLine();
 
-        System.out.print("Enter odometer reading: ");
-        int odometer = Integer.parseInt(scanner.nextLine());
+        int odometer = readInt("Enter odometer reading: ");
+        double price = readDouble("Enter price: ");
 
-        System.out.print("Enter price: ");
-        double price = Double.parseDouble(scanner.nextLine());
-
-        // Create the Vehicle and add it
-        Vehicle newVehicle = new Vehicle(vin, year, odometer, make, model, color, type, price );
+        Vehicle newVehicle = new Vehicle(vin, year, odometer, make, model, color, type, price);
         dealership.addVehicle(newVehicle);
 
-        // Save dealership
         DealershipFileManager dfm = new DealershipFileManager();
         dfm.saveDealership(dealership);
 
         System.out.println("Vehicle added and saved.");
     }
+
     private void processRemoveVehicleRequest() {
-        System.out.print("Enter VIN of vehicle to remove: ");
-        int vin = Integer.parseInt(scanner.nextLine());
+        int vin = readInt("Enter VIN of vehicle to remove: ");
 
         boolean removed = dealership.removeVehicle(vin);
 
@@ -234,12 +239,13 @@ public class UserInterface {
         }
     }
 
+
     private void sellOrLeaseVehicle() {
         ContractFileManager contractFileManager = new ContractFileManager();
 
         // 1. Ask for VIN
         System.out.print("Enter VIN of the vehicle: ");
-        int vin = Integer.parseInt(scanner.nextLine());
+        int vin = readInt("Enter VIN of the vehicle: ");
 
         // 2. Find vehicle in current inventory
         Vehicle vehicle = dealership.getVehicleByVin(vin);
@@ -312,6 +318,11 @@ public class UserInterface {
 
         // 8. Show summary
         System.out.println("Contract saved.");
+        System.out.printf("Vehicle: %d %s %s (%s)%n",
+                contract.getVehicle().getYear(),
+                contract.getVehicle().getMake(),
+                contract.getVehicle().getModel(),
+                contract.getVehicle().getColor());
         System.out.printf("Total Price: %.2f%n", contract.getTotalPrice());
         System.out.printf("Monthly Payment: %.2f%n", contract.getMonthlyPayment());
     }

@@ -92,7 +92,7 @@ public class Dealership {
         return results;
     }
 
-    public ArrayList<Vehicle> getVehiclesByMilage(int minMiles, int maxMiles) {
+    public ArrayList<Vehicle> getVehiclesByMileage(int minMiles, int maxMiles) {
         ArrayList<Vehicle> results = new ArrayList<>();
 
         for (Vehicle v : inventory) {
@@ -104,6 +104,7 @@ public class Dealership {
 
         return results;
     }
+
 
     public ArrayList<Vehicle> getVehiclesByType(String vehicleType) {
         ArrayList<Vehicle> results = new ArrayList<>();
