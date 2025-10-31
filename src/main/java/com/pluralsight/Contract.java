@@ -1,10 +1,10 @@
 package com.pluralsight;
 
 public abstract class Contract {
-    String dateOfContract;
-    String customerName;
-    String customerEmail;
-    Vehicle vehicle;
+    private String dateOfContract;
+    private String customerName;
+    private String customerEmail;
+    private Vehicle vehicle;
 
     public Contract(String dateOfContact,
                     String customerName,
