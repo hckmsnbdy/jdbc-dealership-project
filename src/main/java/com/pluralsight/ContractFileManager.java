@@ -6,11 +6,11 @@ import java.io.IOException;
 
 public class ContractFileManager {
 
-    private static final String FILE_NAME = "contracts.txt";
+    private static final String FILE_PATH = "src/main/resources/contracts.csv";
 
     // Save a contract by appending it to the contracts file
     public void saveContract(Contract contract) {
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter(FILE_NAME, true))) {
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(FILE_PATH, true))) {
 
             StringBuilder line = new StringBuilder();
 
