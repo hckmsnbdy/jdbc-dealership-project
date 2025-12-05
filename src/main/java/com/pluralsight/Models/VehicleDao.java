@@ -312,5 +312,96 @@ public class VehicleDao {
                 price
         );
     }
+    public boolean addVehicle(int dealershipId, Vehicle vehicle) {
+        String insertVehicleSql = """
+            INSERT INTO vehicles
+                (VIN, Make, Model, VehicleYear, Color, Price, Mileage, VehicleType, SOLD)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, 0)
+            """;
+
+        String insertInventorySql = """
+            INSERT INTO inventory (dealership_id, VIN)
+            VALUES (?, ?)
+            """;
+
+        try (Connection connection = DataManager.getConnection()) {
+            connection.setAutoCommit(false);
+
+            try (PreparedStatement vehicleStmt = connection.prepareStatement(insertVehicleSql);
+                 PreparedStatement inventoryStmt = connection.prepareStatement(insertInventorySql)) {
+
+                // Insert into vehicles
+                vehicleStmt.setString(1, vehicle.getVin());
+                vehicleStmt.setString(2, vehicle.getMake());
+                vehicleStmt.setString(3, vehicle.getModel());
+                vehicleStmt.setInt(4, vehicle.getYear());
+                vehicleStmt.setString(5, vehicle.getColor());
+                vehicleStmt.setDouble(6, vehicle.getPrice());
+                vehicleStmt.setInt(7, vehicle.getOdometer());
+                vehicleStmt.setString(8, vehicle.getVehicleType());
+                vehicleStmt.executeUpdate();
+
+                // Insert into inventory
+                inventoryStmt.setInt(1, dealershipId);
+                inventoryStmt.setString(2, vehicle.getVin());
+                inventoryStmt.executeUpdate();
+
+                connection.commit();
+                return true;
+
+            } catch (SQLException e) {
+                connection.rollback();
+                e.printStackTrace();
+            } finally {
+                connection.setAutoCommit(true);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return false;
+    }
+    public boolean removeFromInventory(int dealershipId, String vin) {
+        String deleteInventorySql = """
+            DELETE FROM inventory
+            WHERE dealership_id = ? AND VIN = ?
+            """;
+
+        String markSoldSql = """
+            UPDATE vehicles
+            SET SOLD = 1
+            WHERE VIN = ?
+            """;
+
+        try (Connection connection = DataManager.getConnection()) {
+            connection.setAutoCommit(false);
+
+            try (PreparedStatement deleteStmt = connection.prepareStatement(deleteInventorySql);
+                 PreparedStatement soldStmt = connection.prepareStatement(markSoldSql)) {
+
+                deleteStmt.setInt(1, dealershipId);
+                deleteStmt.setString(2, vin);
+                int rows = deleteStmt.executeUpdate();
+
+                soldStmt.setString(1, vin);
+                soldStmt.executeUpdate();
+
+                connection.commit();
+                connection.setAutoCommit(true);
+
+                return rows > 0;
+
+            } catch (SQLException e) {
+                connection.rollback();
+                e.printStackTrace();
+            } finally {
+                connection.setAutoCommit(true);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return false;
+    }
 
 }

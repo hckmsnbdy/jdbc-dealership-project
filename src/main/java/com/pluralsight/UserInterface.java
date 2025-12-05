@@ -215,45 +215,44 @@ public class UserInterface {
         int year = readInt("Enter year: ");
 
         System.out.print("Enter make: ");
-        String make = scanner.nextLine();
+        String make = scanner.nextLine().trim();
 
         System.out.print("Enter model: ");
-        String model = scanner.nextLine();
+        String model = scanner.nextLine().trim();
 
         System.out.print("Enter type (car/truck/SUV/van): ");
-        String type = scanner.nextLine();
+        String type = scanner.nextLine().trim();
 
         System.out.print("Enter color: ");
-        String color = scanner.nextLine();
+        String color = scanner.nextLine().trim();
 
         int odometer = readInt("Enter odometer reading: ");
         double price = readDouble("Enter price: ");
 
         Vehicle newVehicle = new Vehicle(vin, year, odometer, make, model, color, type, price);
-        dealership.addVehicle(newVehicle);
 
-        DealershipFileManager dfm = new DealershipFileManager();
-        dfm.saveDealership(dealership);
+        boolean success = vehicleDao.addVehicle(currentDealershipId, newVehicle);
 
-        System.out.println("Vehicle added and saved.");
+        if (success) {
+            System.out.println("Vehicle added to database and inventory.");
+        } else {
+            System.out.println("Failed to add vehicle. Please check logs for details.");
+        }
     }
+
 
     private void processRemoveVehicleRequest() {
         System.out.print("Enter VIN of vehicle to remove: ");
         String vin = scanner.nextLine().trim();
 
-        boolean removed = dealership.removeVehicle(vin);
-
+        boolean removed = vehicleDao.removeFromInventory(currentDealershipId, vin);
 
         if (removed) {
-            DealershipFileManager dfm = new DealershipFileManager();
-            dfm.saveDealership(dealership);
-            System.out.println("Vehicle removed and file updated.");
+            System.out.println("Vehicle removed from inventory and marked as sold.");
         } else {
-            System.out.println("Vehicle with VIN " + vin + " not found.");
+            System.out.println("Vehicle with VIN " + vin + " not found in this dealership.");
         }
     }
-
 
     private void sellOrLeaseVehicle() {
         ContractFileManager contractFileManager = new ContractFileManager();
