@@ -1,5 +1,10 @@
 package com.pluralsight;
 
+import com.pluralsight.Models.Dealership;
+import com.pluralsight.Models.LeaseContract;
+import com.pluralsight.Models.SalesContract;
+import com.pluralsight.Models.Vehicle;
+
 import java.util.Scanner;
 import java.util.ArrayList;
 
@@ -202,7 +207,9 @@ public class UserInterface {
     private void processAddVehicleRequest() {
         System.out.println("=== ADD NEW VEHICLE ===");
 
-        int vin = readInt("Enter VIN: ");
+        System.out.print("Enter VIN: ");
+        String vin = scanner.nextLine().trim();
+
         int year = readInt("Enter year: ");
 
         System.out.print("Enter make: ");
@@ -230,9 +237,11 @@ public class UserInterface {
     }
 
     private void processRemoveVehicleRequest() {
-        int vin = readInt("Enter VIN of vehicle to remove: ");
+        System.out.print("Enter VIN of vehicle to remove: ");
+        String vin = scanner.nextLine().trim();
 
         boolean removed = dealership.removeVehicle(vin);
+
 
         if (removed) {
             DealershipFileManager dfm = new DealershipFileManager();
@@ -248,7 +257,8 @@ public class UserInterface {
         ContractFileManager contractFileManager = new ContractFileManager();
 
         // 1. Ask for VIN
-        int vin = readInt("Enter VIN of the vehicle: ");
+        System.out.println("Enter VIN of the vehicle: ");
+        String vin = scanner.nextLine().trim();
 
         // 2. Find vehicle in current inventory
         Vehicle vehicle = dealership.getVehicleByVin(vin);
@@ -313,7 +323,7 @@ public class UserInterface {
         contractFileManager.saveContract(contract);
 
         // 6. Remove vehicle from dealership inventory
-        dealership.removeVehicle(vehicle);
+        dealership.removeVehicle(vehicle.getVin());
 
         // 7. Also persist updated inventory to inventory.csv
         DealershipFileManager dfm = new DealershipFileManager();

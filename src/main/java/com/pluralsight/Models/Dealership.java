@@ -1,17 +1,23 @@
-package com.pluralsight;
+package com.pluralsight.Models;
 
 import java.util.ArrayList;
 
 public class Dealership {
+    private int dealership_id;
     private String name;
     private String address;
     private String phone;
     private ArrayList<Vehicle> inventory = new ArrayList<>();
 
     public Dealership(String name, String address, String phone) {
+        this.dealership_id = dealership_id;
         this.name = name;
         this.address = address;
         this.phone = phone;
+    }
+
+    public int getDealership_id() {
+        return dealership_id;
     }
 
     public String getName() {
@@ -124,31 +130,28 @@ public class Dealership {
     public void addVehicle(Vehicle vehicle){
         inventory.add(vehicle);
     }
-    public boolean removeVehicle(int vin) {
-        // Loop over inventory to find vehicle with this VIN
+
+    // Returns the vehicle with the given VIN or null if not found
+    public boolean removeVehicle(String vin) {
         for (int i = 0; i < inventory.size(); i++) {
             Vehicle v = inventory.get(i);
-            if (v.getVin() == vin) {
+            if (v.getVin().equalsIgnoreCase(vin)) {
                 inventory.remove(i);
-                return true; // removed
+                return true;
             }
         }
-        return false; // not found
+        return false;
     }
-    // Returns the vehicle with the given VIN or null if not found
-    public Vehicle getVehicleByVin(int vin) {
+
+    public Vehicle getVehicleByVin(String vin) {
         for (Vehicle v : inventory) {
-            if (v.getVin() == vin) {
+            if (v.getVin().equalsIgnoreCase(vin)) {
                 return v;
             }
         }
         return null;
     }
 
-    // Removes the given vehicle object from inventory
-    public void removeVehicle(Vehicle vehicle) {
-        inventory.remove(vehicle);
-    }
 
 
 

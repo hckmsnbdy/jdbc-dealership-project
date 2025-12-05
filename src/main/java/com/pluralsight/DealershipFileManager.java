@@ -1,11 +1,16 @@
 package com.pluralsight;
 
+import com.pluralsight.Models.Dealership;
+import com.pluralsight.Models.Vehicle;
+
 import java.io.*;
+import java.sql.Connection;
 
 public class DealershipFileManager {
     private static final String INVENTORY_FILE = "src/main/resources/inventory.csv";
 
     public Dealership getDealership() {
+        final Connection connection;
         Dealership dealership = null;
 
         try {
@@ -31,7 +36,7 @@ public class DealershipFileManager {
                 String[] data = line.split("\\|");
 
                 // Extract each field
-                int vin = Integer.parseInt(data[0]);
+                String vin = data[0];
                 int year = Integer.parseInt(data[1]);
                 String make = data[2];
                 String model = data[3];
