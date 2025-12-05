@@ -1,12 +1,12 @@
 package com.pluralsight;
 
+import com.pluralsight.Models.VehicleDao;
 import com.pluralsight.Models.Dealership;
 import com.pluralsight.Models.LeaseContract;
 import com.pluralsight.Models.SalesContract;
 import com.pluralsight.Models.Vehicle;
-
+import java.util.List;
 import java.util.Scanner;
-import java.util.ArrayList;
 
 public class UserInterface {
     // This holds the dealership we are working with
@@ -14,6 +14,12 @@ public class UserInterface {
 
     // Scanner to read user input from console
     private Scanner scanner = new Scanner(System.in);
+
+    // DAO for database access
+    private VehicleDao vehicleDao = new VehicleDao();
+
+    // current dealership id (for now fixed to 1)
+    private int currentDealershipId = 1;
 
     private void init() {
         // Create the file manager that knows how to read inventory.csv
@@ -121,16 +127,13 @@ public class UserInterface {
         }
     }
 
-    private void displayVehicles(ArrayList<Vehicle> vehicles) {
-        // If the list is empty or null, tell the user
+    private void displayVehicles(List<Vehicle> vehicles) {
         if (vehicles == null || vehicles.isEmpty()) {
             System.out.println("No vehicles found.");
             return;
         }
 
-        // Loop through each vehicle and print its details
         for (Vehicle v : vehicles) {
-            // This assumes your Vehicle class has getters like getVin(), getYear(), etc.
             System.out.println(
                     "VIN: " + v.getVin() +
                             " | Year: " + v.getYear() +
@@ -143,67 +146,66 @@ public class UserInterface {
             );
         }
     }
-    private void processAllVehiclesRequest() {
-        // Get the full inventory list from the dealership
-        ArrayList<Vehicle> allVehicles = dealership.getAllVehicles();
 
-        // Display them to the screen
+    private void processAllVehiclesRequest() {
+        List<Vehicle> allVehicles = vehicleDao.getAllVehiclesForDealership(currentDealershipId);
         displayVehicles(allVehicles);
     }
+
     private void processGetByPriceRange() {
         int min = readInt("Enter minimum price: ");
         int max = readInt("Enter maximum price: ");
 
-        ArrayList<Vehicle> matches = dealership.getVehiclesByPrice(min, max);
+        List<Vehicle> matches = vehicleDao.getByPriceRange(currentDealershipId, min, max);
         displayVehicles(matches);
     }
+
 
     private void processGetByMakeModel() {
-        // Ask user for make (brand) and model
         System.out.print("Enter make (brand): ");
-        String make = scanner.nextLine();
+        String make = scanner.nextLine().trim();
 
         System.out.print("Enter model: ");
-        String model = scanner.nextLine();
+        String model = scanner.nextLine().trim();
 
-        // Ask dealership for matching vehicles
-        ArrayList<Vehicle> matches = dealership.getVehiclesByMakeModel(make, model);
-
-        // Display them
+        List<Vehicle> matches = vehicleDao.getByMakeModel(currentDealershipId, make, model);
         displayVehicles(matches);
     }
+
     private void processGetByYearRange() {
         int minYear = readInt("Enter minimum year: ");
         int maxYear = readInt("Enter maximum year: ");
 
-        ArrayList<Vehicle> matches = dealership.getVehiclesByYear(minYear, maxYear);
+        List<Vehicle> matches = vehicleDao.getByYearRange(currentDealershipId, minYear, maxYear);
         displayVehicles(matches);
     }
+
 
     private void processGetByColor() {
         System.out.print("Enter color: ");
-        String color = scanner.nextLine();
+        String color = scanner.nextLine().trim();
 
-        ArrayList<Vehicle> matches = dealership.getVehiclesByColor(color);
-
+        List<Vehicle> matches = vehicleDao.getByColor(currentDealershipId, color);
         displayVehicles(matches);
     }
+
     private void processGetByMileageRange() {
         int minMiles = readInt("Enter minimum mileage: ");
         int maxMiles = readInt("Enter maximum mileage: ");
 
-        ArrayList<Vehicle> matches = dealership.getVehiclesByMileage(minMiles, maxMiles);
+        List<Vehicle> matches = vehicleDao.getByMileageRange(currentDealershipId, minMiles, maxMiles);
         displayVehicles(matches);
     }
+
 
     private void processGetByType() {
         System.out.print("Enter vehicle type (car / truck / SUV / van): ");
-        String type = scanner.nextLine();
+        String type = scanner.nextLine().trim();
 
-        ArrayList<Vehicle> matches = dealership.getVehiclesByType(type);
-
+        List<Vehicle> matches = vehicleDao.getByType(currentDealershipId, type);
         displayVehicles(matches);
     }
+
     private void processAddVehicleRequest() {
         System.out.println("=== ADD NEW VEHICLE ===");
 
