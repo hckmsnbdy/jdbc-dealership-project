@@ -13,9 +13,14 @@ public class DataManager {
     static {
         dataSource = new BasicDataSource();
         dataSource.setUrl("jdbc:mysql://localhost:3306/CarDealershipDatabase");
-        dataSource.setUsername("user");
-        dataSource.setPassword("pass");
+
+        String user = System.getProperty("db.user");
+        String pass = System.getProperty("db.pass");
+
+        dataSource.setUsername(user);
+        dataSource.setPassword(pass);
     }
+
 
     public static Connection getConnection() throws SQLException {
         return dataSource.getConnection();
