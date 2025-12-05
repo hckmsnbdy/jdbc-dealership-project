@@ -1,24 +1,23 @@
 package com.pluralsight;
 
-import com.pluralsight.Models.VehicleDao;
-import com.pluralsight.Models.Dealership;
-import com.pluralsight.Models.LeaseContract;
-import com.pluralsight.Models.SalesContract;
-import com.pluralsight.Models.Vehicle;
+import com.pluralsight.Models.*;
+
 import java.util.List;
 import java.util.Scanner;
 
 public class UserInterface {
+
+    private ContractDao contractDao = new ContractDao();
+
     // This holds the dealership we are working with
     private Dealership dealership;
 
-    // Scanner to read user input from console
     private Scanner scanner = new Scanner(System.in);
 
     // DAO for database access
     private VehicleDao vehicleDao = new VehicleDao();
 
-    // current dealership id (for now fixed to 1)
+    // current dealership id
     private int currentDealershipId = 1;
 
     private void init() {
@@ -258,15 +257,16 @@ public class UserInterface {
         ContractFileManager contractFileManager = new ContractFileManager();
 
         // 1. Ask for VIN
-        System.out.println("Enter VIN of the vehicle: ");
+        System.out.print("Enter VIN of the vehicle: ");
         String vin = scanner.nextLine().trim();
 
-        // 2. Find vehicle in current inventory
-        Vehicle vehicle = dealership.getVehicleByVin(vin);
+        // Find vehicle in database inventory
+        Vehicle vehicle = vehicleDao.getAvailableVehicleByVin(currentDealershipId, vin);
         if (vehicle == null) {
-            System.out.println("Vehicle not found with VIN: " + vin);
+            System.out.println("Vehicle not found in database for this dealership or it is already sold.");
             return;
         }
+
 
         // 3. Ask for contract info
         System.out.print("Enter contract date (yyyyMMdd): ");
@@ -320,15 +320,26 @@ public class UserInterface {
             return;
         }
 
-        // 5. Save contract to file
-        contractFileManager.saveContract(contract);
+        // 5. Save contract to database
+        boolean saved = false;
 
-        // 6. Remove vehicle from dealership inventory
-        dealership.removeVehicle(vehicle.getVin());
+        if (contract instanceof SalesContract sc) {
+            saved = contractDao.saveSalesContract(sc, currentDealershipId);
+        } else if (contract instanceof LeaseContract lc) {
+            saved = contractDao.saveLeaseContract(lc, currentDealershipId);
+        }
 
-        // 7. Also persist updated inventory to inventory.csv
-        DealershipFileManager dfm = new DealershipFileManager();
-        dfm.saveDealership(dealership);
+        if (!saved) {
+            System.out.println("Failed to save contract to database. Aborting.");
+            return;
+        }
+
+        // 6. Remove vehicle from DB inventory and mark as sold
+        boolean removedFromInventory = vehicleDao.removeFromInventory(currentDealershipId, vehicle.getVin());
+
+        if (!removedFromInventory) {
+            System.out.println("Warning: vehicle could not be removed from inventory in the database.");
+        }
 
         // 8. Show summary
         System.out.println("Contract saved.");
@@ -341,73 +352,33 @@ public class UserInterface {
         System.out.printf("Monthly Payment: %.2f%n", contract.getMonthlyPayment());
     }
     private void listAllContracts() {
-        ContractFileManager cfm = new ContractFileManager();
-        var lines = cfm.readAllContracts();
+        List<ContractSummary> contracts =
+                contractDao.getAllContractsForDealership(currentDealershipId);
 
-        if (lines == null || lines.isEmpty()) {
-            System.out.println("No contracts found.");
+        if (contracts == null || contracts.isEmpty()) {
+            System.out.println("No contracts found for this dealership.");
             return;
         }
 
         System.out.println("=== CONTRACTS ===");
 
-        for (String line : lines) {
+        for (ContractSummary cs : contracts) {
+            System.out.printf("[%s] %s - %s (%s)%n",
+                    cs.getContractType(),
+                    cs.getContractDate(),
+                    cs.getCustomerName(),
+                    cs.getCustomerEmail());
 
-            String[] parts = line.split("\\|");
-            String kind = parts[0];
+            System.out.printf("  Vehicle: %d %s %s (%s) VIN:%s%n",
+                    cs.getYear(),
+                    cs.getMake(),
+                    cs.getModel(),
+                    cs.getColor(),
+                    cs.getVin());
 
-            if ("SALE".equalsIgnoreCase(kind)) {
-                if (parts.length >= 18) {
-                    System.out.printf(
-                            "[SALE] %s - %s (%s)%n",
-                            parts[1], // date
-                            parts[2], // customer name
-                            parts[3]  // customer email
-                    );
-                    System.out.printf("  Vehicle: %s %s %s (%s) VIN:%s%n",
-                            parts[5],  // year
-                            parts[6],  // make
-                            parts[7],  // model
-                            parts[9],  // color
-                            parts[4]   // vin
-                    );
-                    System.out.printf("  Total: %s  | Monthly: %s  | Finance: %s%n",
-                            parts[15], // total price
-                            parts[17], // monthly payment
-                            parts[16]  // YES/NO
-                    );
-                } else {
-                    System.out.println("  (malformed SALE line) " + line);
-                }
-            } else if ("LEASE".equalsIgnoreCase(kind)) {
-                if (parts.length >= 16) {
-                    System.out.printf(
-                            "[LEASE] %s - %s (%s)%n",
-                            parts[1], // date
-                            parts[2], // name
-                            parts[3]  // email
-                    );
-                    System.out.printf("  Vehicle: %s %s %s (%s) VIN:%s%n",
-                            parts[5],   // year
-                            parts[6],   // make
-                            parts[7],   // model
-                            parts[9],   // color
-                            parts[4]    // vin
-                    );
-                    System.out.printf("  Total: %s  | Monthly: %s%n",
-                            parts[14],  // total
-                            parts[15]   // monthly
-                    );
-                } else {
-                    System.out.println("  (malformed LEASE line) " + line);
-                }
-            } else {
-                // unknown line type
-                System.out.println("Unknown contract type: " + line);
-            }
+            System.out.printf("  Total: %.2f | Monthly: %.2f%n",
+                    cs.getTotalPrice(),
+                    cs.getMonthlyPayment());
         }
     }
-
-
-
 }

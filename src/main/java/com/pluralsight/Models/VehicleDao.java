@@ -14,18 +14,19 @@ public class VehicleDao {
         List<Vehicle> vehicles = new ArrayList<>();
 
         String sql = """
-                SELECT v.VIN,
-                       v.Make,
-                       v.Model,
-                       v.VehicleYear,
-                       v.Color,
-                       v.Price,
-                       v.Mileage,
-                       v.VehicleType
-                FROM vehicles v
-                JOIN inventory i ON v.VIN = i.VIN
-                WHERE i.dealership_id = ?
-                """;
+            SELECT v.VIN,
+                   v.Make,
+                   v.Model,
+                   v.VehicleYear,
+                   v.Color,
+                   v.Price,
+                   v.Mileage,
+                   v.VehicleType
+            FROM vehicles v
+            JOIN inventory i ON v.VIN = i.VIN
+            WHERE i.dealership_id = ?
+              AND v.SOLD = 0
+            """;
 
         try (Connection connection = DataManager.getConnection();
              PreparedStatement statement = connection.prepareStatement(sql)) {
@@ -34,27 +35,7 @@ public class VehicleDao {
 
             try (ResultSet rs = statement.executeQuery()) {
                 while (rs.next()) {
-                    String vin = rs.getString("VIN");
-                    int year = rs.getInt("VehicleYear");
-                    String make = rs.getString("Make");
-                    String model = rs.getString("Model");
-                    String color = rs.getString("Color");
-                    int mileage = rs.getInt("Mileage");
-                    double price = rs.getDouble("Price");
-                    String type = rs.getString("VehicleType");
-
-                    Vehicle vehicle = new Vehicle(
-                            vin,
-                            year,
-                            mileage,
-                            make,
-                            model,
-                            color,
-                            type,
-                            price
-                    );
-
-                    vehicles.add(vehicle);
+                    vehicles.add(mapRowToVehicle(rs));
                 }
             }
 
@@ -64,6 +45,7 @@ public class VehicleDao {
 
         return vehicles;
     }
+
     public List<Vehicle> getByPriceRange(int dealershipId, double minPrice, double maxPrice) {
         List<Vehicle> vehicles = new ArrayList<>();
 
@@ -402,6 +384,41 @@ public class VehicleDao {
         }
 
         return false;
+    }
+    public Vehicle getAvailableVehicleByVin(int dealershipId, String vin) {
+        String sql = """
+            SELECT v.VIN,
+                   v.Make,
+                   v.Model,
+                   v.VehicleYear,
+                   v.Color,
+                   v.Price,
+                   v.Mileage,
+                   v.VehicleType
+            FROM vehicles v
+            JOIN inventory i ON v.VIN = i.VIN
+            WHERE i.dealership_id = ?
+              AND v.VIN = ?
+              AND v.SOLD = 0
+            """;
+
+        try (Connection connection = DataManager.getConnection();
+             PreparedStatement statement = connection.prepareStatement(sql)) {
+
+            statement.setInt(1, dealershipId);
+            statement.setString(2, vin);
+
+            try (ResultSet rs = statement.executeQuery()) {
+                if (rs.next()) {
+                    return mapRowToVehicle(rs); // daha önce yazdığımız helper
+                }
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return null;
     }
 
 }
